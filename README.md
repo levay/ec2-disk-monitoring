@@ -99,9 +99,6 @@ During each scheduled run, the automation:
 ├── task-definition.json          # ECS task definition, if managed in source
 └── README.md
 ```
-
-> Adjust the file names and folders above to match the repository implementation.
-
 ---
 
 ## Prerequisites
@@ -327,7 +324,7 @@ Organization/EC2/DiskMonitoring
 Assume the following EC2 instance is enrolled:
 
 | Item | Example |
-|---|---|
+|---   |---      |
 | AWS account | Payments-Production |
 | EC2 instance | `payment-api-01` |
 | Monitoring tag | `Monitoring=enabled` |
