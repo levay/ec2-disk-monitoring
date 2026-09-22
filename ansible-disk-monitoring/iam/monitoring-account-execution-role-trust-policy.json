@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TrustECSFargateTask",
+      "Effect": "Allow",
+      "Principal": { "Service": "ecs-tasks.amazonaws.com" },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": { "aws:SourceAccount": "999999999999" },
+        "ArnLike": { "aws:SourceArn": "arn:aws:ecs:ap-south-1:999999999999:*" }
+      }
+    }
+  ]
+}

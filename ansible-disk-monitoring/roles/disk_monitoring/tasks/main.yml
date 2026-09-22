@@ -1,0 +1,36 @@
+---
+- name: Gather mount/disk facts from the target VM
+  ansible.builtin.setup:
+    gather_subset:
+      - mounts
+  register: disk_facts
+
+- name: Filter to real, monitorable filesystems
+  ansible.builtin.set_fact:
+    disk_mounts: >-
+      {{ disk_facts.ansible_facts.ansible_mounts
+         | rejectattr('fstype', 'in', excluded_fstypes)
+         | selectattr('size_total', 'gt', 0)
+         | list }}
+
+- name: Push disk metrics to CloudWatch, one mount at a time
+  ansible.builtin.include_tasks: push_metrics.yml
+  loop: "{{ disk_mounts }}"
+  loop_control:
+    loop_var: mount
+    label: "{{ mount.mount }}"
+
+- name: Flag mounts already past the critical free-space threshold
+  ansible.builtin.debug:
+    msg: >-
+      CRITICAL: {{ inventory_hostname }} [{{ account_alias | default('?') }}]
+      mount {{ mount.mount }} has only
+      {{ ((mount.size_available / mount.size_total) * 100) | round(1) }}% free
+      ({{ (mount.size_available / 1073741824) | round(2) }} GB)
+  loop: "{{ disk_mounts }}"
+  loop_control:
+    loop_var: mount
+    label: "{{ mount.mount }}"
+  when: >-
+    ((mount.size_available / mount.size_total) * 100)
+    < disk_alert_thresholds.critical_percent_free

@@ -1,0 +1,42 @@
+---
+# site.yml — entry point run on every schedule tick (Amazon EventBridge
+# Scheduler -> ECS Fargate task, see automation/ecs_task_and_schedule.tf).
+#
+# 1) Refresh cross-account credentials/inventory from accounts.yml so a
+#    newly onboarded account is picked up with no playbook change.
+# 2) Connect to every discovered, tagged VM over SSM (no SSH) and push
+#    its disk metrics into its own account's CloudWatch namespace.
+
+- name: Refresh cross-account AWS profiles and dynamic inventory
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Regenerate ~/.aws/config profiles from accounts.yml
+      ansible.builtin.command: python3 {{ playbook_dir }}/../automation/generate_aws_profiles.py
+      changed_when: false
+
+    - name: Regenerate per-account/region dynamic inventory files
+      ansible.builtin.command: python3 {{ playbook_dir }}/../inventory/generate_inventory.py
+      changed_when: false
+
+- name: Collect disk usage and publish CloudWatch metrics
+  hosts: all
+  gather_facts: false
+  strategy: free
+  serial: "30%"
+  tasks:
+    - name: Confirm the VM is reachable over SSM (fail per host, not per run)
+      ansible.builtin.ping:
+      register: ssm_ping
+      ignore_errors: true
+
+    - name: Run the disk_monitoring role
+      ansible.builtin.include_role:
+        name: disk_monitoring
+      when: ssm_ping is succeeded
+
+    - name: Record unreachable hosts (feeds the fleet-coverage metric)
+      ansible.builtin.debug:
+        msg: "UNREACHABLE over SSM: {{ inventory_hostname }} [{{ account_alias | default('?') }}]"
+      when: ssm_ping is failed

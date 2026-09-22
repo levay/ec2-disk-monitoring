@@ -1,0 +1,32 @@
+---
+# Single source of truth for enrolled AWS accounts. Adding a spoke
+# account (e.g. after an acquisition) is a config-only change — see
+# README.md "Onboarding a new account".
+
+accounts:
+  - account_id: "111111111111"
+    alias: acct-prod-payments
+    role_arn: "arn:aws:iam::111111111111:role/DiskMonitoring-CrossAccountRole"
+    external_id: "diskmon-prod-payments"
+    regions: ["ap-south-1", "us-east-1"]
+
+  - account_id: "222222222222"
+    alias: acct-dev-shared
+    role_arn: "arn:aws:iam::222222222222:role/DiskMonitoring-CrossAccountRole"
+    external_id: "diskmon-dev-shared"
+    regions: ["ap-south-1"]
+
+  - account_id: "333333333333"
+    alias: acct-acquired-co-x
+    role_arn: "arn:aws:iam::333333333333:role/DiskMonitoring-CrossAccountRole"
+    external_id: "diskmon-acquired-co-x"
+    regions: ["eu-west-1"]
+
+# Central (monitoring) account settings.
+monitoring_account:
+  account_id: "999999999999"
+  region: "ap-south-1"
+  ssm_transfer_bucket: "diskmon-ssm-transfer-999999999999"
+  run_log_bucket: "diskmon-run-logs-999999999999"
+  cloudwatch_namespace: "DiskMonitoring"
+  sns_topic_arn: "arn:aws:sns:ap-south-1:999999999999:diskmon-alerts"

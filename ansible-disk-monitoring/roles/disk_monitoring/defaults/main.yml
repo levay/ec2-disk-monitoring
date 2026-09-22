@@ -1,0 +1,17 @@
+---
+cloudwatch_namespace: DiskMonitoring
+
+disk_alert_thresholds:
+  warning_percent_free: 20
+  critical_percent_free: 10
+
+# Filesystem types that are never real, monitorable disks.
+excluded_fstypes:
+  - tmpfs
+  - devtmpfs
+  - squashfs
+  - overlay
+  - overlayfs
+  - iso9660
+  - proc
+  - sysfs

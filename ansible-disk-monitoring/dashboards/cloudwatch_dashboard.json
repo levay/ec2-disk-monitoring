@@ -1,0 +1,49 @@
+{
+  "start": "-PT24H",
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0, "y": 0, "width": 24, "height": 1,
+      "properties": {
+        "markdown": "## Disk Monitoring — Cross-Account (via CloudWatch Observability Access Manager)"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 1, "width": 12, "height": 6,
+      "properties": {
+        "title": "Lowest DiskPercentFree per account (last 24h)",
+        "view": "timeSeries",
+        "region": "ap-south-1",
+        "metrics": [
+          [ { "expression": "SELECT MIN(DiskPercentFree) FROM SCHEMA(\"DiskMonitoring\", AccountAlias, InstanceId, MountPoint) GROUP BY AccountAlias", "label": "min % free" } ]
+        ],
+        "yAxis": { "left": { "min": 0, "max": 100 } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 1, "width": 12, "height": 6,
+      "properties": {
+        "title": "Mounts currently below 10% free",
+        "view": "singleValue",
+        "region": "ap-south-1",
+        "metrics": [
+          [ { "expression": "SELECT COUNT(DiskPercentFree) FROM SCHEMA(\"DiskMonitoring\", AccountAlias, InstanceId, MountPoint) WHERE DiskPercentFree < 10", "label": "mounts < 10% free" } ]
+        ]
+      }
+    },
+    {
+      "type": "alarm",
+      "x": 0, "y": 7, "width": 24, "height": 4,
+      "properties": {
+        "title": "Active disk-space alarms (all linked accounts)",
+        "alarms": [
+          "arn:aws:cloudwatch:ap-south-1:111111111111:alarm:diskmon-critical-acct-prod-payments",
+          "arn:aws:cloudwatch:ap-south-1:222222222222:alarm:diskmon-critical-acct-dev-shared",
+          "arn:aws:cloudwatch:eu-west-1:333333333333:alarm:diskmon-critical-acct-acquired-co-x"
+        ]
+      }
+    }
+  ]
+}

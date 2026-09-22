@@ -1,0 +1,49 @@
+---
+# Included once per mount (loop var: `mount`) by tasks/main.yml.
+# Both metric pushes execute on the CONTROL NODE (delegate_to:
+# localhost) using the AWS CLI profile for this host's own account
+# (account_alias, set by the dynamic-inventory `compose` block) — so
+# each metric lands in the same AWS account the VM lives in, ready to
+# be surfaced centrally via CloudWatch cross-account observability.
+
+- name: Compute free-space percentage and free GB for this mount
+  ansible.builtin.set_fact:
+    _percent_free: "{{ ((mount.size_available / mount.size_total) * 100) | round(2) }}"
+    _gb_free: "{{ (mount.size_available / 1073741824) | round(2) }}"
+    _instance_id: "{{ instance_id | default(inventory_hostname) }}"
+
+- name: Push DiskPercentFree metric
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../files/push_cloudwatch_metrics.py"
+      - "--profile={{ account_alias }}"
+      - "--region={{ ansible_aws_ssm_region }}"
+      - "--namespace={{ cloudwatch_namespace }}"
+      - "--metric-name=DiskPercentFree"
+      - "--value={{ _percent_free }}"
+      - "--unit=Percent"
+      - >-
+        --dimensions={{ {'InstanceId': _instance_id,
+                          'MountPoint': mount.mount,
+                          'AccountAlias': account_alias} | to_json }}
+  delegate_to: localhost
+  changed_when: false
+
+- name: Push DiskFreeGB metric
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../files/push_cloudwatch_metrics.py"
+      - "--profile={{ account_alias }}"
+      - "--region={{ ansible_aws_ssm_region }}"
+      - "--namespace={{ cloudwatch_namespace }}"
+      - "--metric-name=DiskFreeGB"
+      - "--value={{ _gb_free }}"
+      - "--unit=None"
+      - >-
+        --dimensions={{ {'InstanceId': _instance_id,
+                          'MountPoint': mount.mount,
+                          'AccountAlias': account_alias} | to_json }}
+  delegate_to: localhost
+  changed_when: false

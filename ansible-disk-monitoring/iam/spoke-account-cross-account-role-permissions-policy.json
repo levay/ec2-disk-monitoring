@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SessionsOnlyOnTaggedInstances",
+      "Effect": "Allow",
+      "Action": ["ssm:StartSession", "ssm:ResumeSession", "ssm:TerminateSession"],
+      "Resource": "arn:aws:ec2:*:*:instance/*",
+      "Condition": {
+        "StringEquals": { "ssm:resourceTag/Monitoring": "enabled" }
+      }
+    },
+    {
+      "Sid": "SessionManagerRunShellDocument",
+      "Effect": "Allow",
+      "Action": "ssm:StartSession",
+      "Resource": "arn:aws:ssm:*::document/SSM-SessionManagerRunShell"
+    },
+    {
+      "Sid": "ReadOnlyDiscoveryAndHealth",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:DescribeSessions",
+        "ssm:GetConnectionStatus",
+        "ssm:DescribeInstanceInformation",
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PublishOnlyDiskMonitoringMetrics",
+      "Effect": "Allow",
+      "Action": "cloudwatch:PutMetricData",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "cloudwatch:namespace": "DiskMonitoring" }
+      }
+    },
+    {
+      "Sid": "SsmTransferBucket",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetEncryptionConfiguration"],
+      "Resource": [
+        "arn:aws:s3:::diskmon-ssm-transfer-999999999999",
+        "arn:aws:s3:::diskmon-ssm-transfer-999999999999/*"
+      ]
+    }
+  ]
+}

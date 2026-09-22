@@ -1,0 +1,12 @@
+---
+ansible_connection: community.aws.aws_ssm
+ansible_aws_ssm_bucket_name: "diskmon-ssm-transfer-999999999999"
+ansible_aws_ssm_region: "ap-south-1"
+ansible_python_interpreter: /usr/bin/python3
+ansible_shell_type: sh
+
+disk_alert_thresholds:
+  warning_percent_free: 20
+  critical_percent_free: 10
+
+cloudwatch_namespace: DiskMonitoring

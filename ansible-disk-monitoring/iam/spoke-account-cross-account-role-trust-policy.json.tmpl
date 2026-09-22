@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TrustMonitoringAccountExecutionRoleOnly",
+      "Effect": "Allow",
+      "Principal": { "AWS": "arn:aws:iam::999999999999:role/DiskMonitoring-ExecutionRole" },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": { "sts:ExternalId": "__EXTERNAL_ID_FROM_ACCOUNTS_YML__" }
+      }
+    }
+  ]
+}

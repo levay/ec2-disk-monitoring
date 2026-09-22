@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeEverySpokeAccountRole",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::*:role/DiskMonitoring-CrossAccountRole"
+    },
+    {
+      "Sid": "SsmTransferAndRunLogBuckets",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:GetBucketLocation"],
+      "Resource": [
+        "arn:aws:s3:::diskmon-ssm-transfer-999999999999",
+        "arn:aws:s3:::diskmon-ssm-transfer-999999999999/*",
+        "arn:aws:s3:::diskmon-run-logs-999999999999",
+        "arn:aws:s3:::diskmon-run-logs-999999999999/*"
+      ]
+    },
+    {
+      "Sid": "OwnTaskLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogGroup"],
+      "Resource": "arn:aws:logs:*:999999999999:log-group:/diskmon/*"
+    }
+  ]
+}
