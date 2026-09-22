@@ -8,6 +8,9 @@ The solution uses **Ansible**, **AWS Systems Manager (SSM)**, and **Amazon Cloud
 
 ## Overview
 
+<img width="1952" height="2176" alt="Gemini_Generated_Image_a51i78a51i78a51i" src="https://github.com/user-attachments/assets/d949e5e5-3b56-4002-819a-544b8063d05f" />
+
+
 This project enables a central operations team to monitor disk capacity across AWS accounts while keeping access secure and scalable.
 
 During each scheduled run, the automation:
